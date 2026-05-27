@@ -72,10 +72,16 @@ zap-dast:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Run ZAP Baseline Scan (Non-blocking)
+    - name: Run ZAP Baseline Scan (Report Only)
       uses: zaproxy/action-baseline@v0.12.0
-      continue-on-error: true
       with:
         target: 'https://demo.testfire.net'
         fail_action: false
+      continue-on-error: true
+
+    - name: Upload ZAP report
+      uses: actions/upload-artifact@v4
+      with:
+        name: zap-report
+        path: report_html.html
 
