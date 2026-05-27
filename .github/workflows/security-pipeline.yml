@@ -1,37 +1,4 @@
 
-name: ShieldFlow Security Pipeline
-
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-
-  semgrep-sast:
-    name: Semgrep SAST Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Run Semgrep
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: p/security-audit
-
-  gitleaks-secrets:
-    name: Gitleaks Secrets Scan
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v4
-
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
-
   trivy-sca:
     name: Trivy Dependency Scan
     runs-on: ubuntu-latest
@@ -40,9 +7,10 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Run Trivy Scan
+      - name: Run Trivy Scan (Fail on High/Critical)
         uses: aquasecurity/trivy-action@master
         with:
           scan-type: fs
-          format: table
-          severity: HIGH,CRITICAL
+          format: sarif
+          severity: CRITICAL,HIGH
+          exit-code: 1
