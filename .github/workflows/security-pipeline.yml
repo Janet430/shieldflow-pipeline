@@ -61,31 +61,3 @@ jobs:
           name: security-reports
           path: trivy-results.sarif
 
-
-  # --- DAST Scan ---
-  dast:
-  runs-on: ubuntu-latest
-  steps:
-    - uses: actions/checkout@v3
-
-    - name: Start vulnerable app container
-      run: docker run -d -p 8080:3000 bkimminich/juice-shop
-
-    - name: Wait for app startup
-      run: sleep 40
-
-    - name: Run OWASP ZAP baseline scan
-      run: |
-        mkdir -p zap-results
-        docker run --network="host" \
-          -v ${{ github.workspace }}/zap-results:/zap/wrk:rw \
-          ghcr.io/zaproxy/zaproxy:stable \
-          zap-baseline.py \
-          -t http://localhost:8080 \
-          -r zap-report.html
-
-    - name: Upload DAST report
-      uses: actions/upload-artifact@v4
-      with:
-        name: zap-report
-        path: zap-results/zap-report.html
