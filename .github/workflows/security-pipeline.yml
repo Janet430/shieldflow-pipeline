@@ -61,3 +61,35 @@ jobs:
           name: security-reports
           path: trivy-results.sarif
 
+  dast:
+    name: OWASP ZAP DAST Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Start Juice Shop
+        run: docker run -d -p 3000:3000 bkimminich/juice-shop
+
+      - name: Wait for App to Start
+        run: sleep 60
+
+      - name: Run ZAP Baseline Scan
+        run: |
+          mkdir -p zap-results
+
+          docker run --rm -t \
+            --network="host" \
+            -v $(pwd)/zap-results:/zap/wrk \
+            ghcr.io/zaproxy/zaproxy \
+            zap-baseline.py \
+            -t http://localhost:3000 \
+            -r zap-report.html \
+            -I
+
+      - name: Upload ZAP Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-results/zap-report.html
