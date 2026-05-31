@@ -63,4 +63,31 @@ jobs:
 
 
 
+  # --- DAST Scan ---
+  dast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Start vulnerable app container
+        run: docker run -d -p 8080:3000 bkimminich/juice-shop
+
+      - name: Wait for app startup
+        run: sleep 40
+
+      - name: Run OWASP ZAP baseline scan
+        run: |
+          docker run --network="host" \
+          ghcr.io/zaproxy/zaproxy:stable \
+          zap-baseline.py \
+          -t http://localhost:8080 \
+          -r zap-report.html
+
+      - name: Upload DAST report
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-report
+          path: zap-report.html
+
 
